@@ -34,6 +34,7 @@ setup(
     url='https://github.com/ethman/sota-music-tagging-models',
     license='MIT',
     packages=find_packages(),
+    package_data={'': ['models/*/*/best_model.pth']},
     keywords=['music tagging'],
     install_requires=requirements,
 )

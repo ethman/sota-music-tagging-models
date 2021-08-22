@@ -15,7 +15,7 @@ class DummyConfig():
     batch_size: int = 1
 
 
-project_dir = Path(__file__).parent.parent.resolve()
+project_dir = Path(__file__).parent.resolve()
 MODEL_DIR = project_dir / 'models'
 
 

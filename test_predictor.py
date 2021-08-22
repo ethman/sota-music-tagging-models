@@ -1,5 +1,5 @@
 # coding: utf-8
-from pathlib import Path
+import warnings
 
 import librosa
 from sota_music_taggers.predict import Predictor
@@ -12,29 +12,29 @@ all_datasets = ['jamendo', 'msd', 'mtat']
 
 
 def test_all_combos():
+    warnings.simplefilter('ignore')
+
     audio_path = 'example_audio/mixture.mp3'
     audio, sr = librosa.load(audio_path, sr=TAGGER_SR)
-
-    # training_data = 'mtat'
-    # model_type = 'hcnn'
 
     for training_data in all_datasets:
         print(f'     {training_data}')
         print('  ------------------')
         for model_type in all_models:
+            s = f'{model_type:9}  '
             try:
                 model = Predictor(model_type, training_data, batch_size=1)
-                print(f'  Yes  Loaded    {model_type}')
+                s += f'  Yes  Loaded     '
             except:
-                print(f'- No   Loading   {model_type}')
+                s += f'  Not  Loaded     - No  Outputs'
                 continue
 
             try:
                 outputs = model(audio)
-                print(f'  Yes  Outputs   {model_type}')
+                s += f'  Yes  Outputs'
             except Exception as e:
-                print(f'- No   Outputs   {model_type}')
-
+                s += f' - No  Outputs'
+            print(s)
         print('\n\n')
     i = 0
 
