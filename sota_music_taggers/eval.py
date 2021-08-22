@@ -10,15 +10,14 @@ import fire
 import argparse
 import pickle
 from sklearn import metrics
-import pandas as pd
 
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from solver import skip_files
+from .solver import skip_files
 from sklearn.preprocessing import LabelBinarizer
 
-import model as Model
+from . import model as Model
 
 
 TAGS = ['genre---downtempo', 'genre---ambient', 'genre---rock', 'instrument---synthesizer', 'genre---atmospheric', 'genre---indie', 'instrument---electricpiano', 'genre---newage', 'instrument---strings', 'instrument---drums', 'instrument---drummachine', 'genre---techno', 'instrument---guitar', 'genre---alternative', 'genre---easylistening', 'genre---instrumentalpop', 'genre---chillout', 'genre---metal', 'mood/theme---happy', 'genre---lounge', 'genre---reggae', 'genre---popfolk', 'genre---orchestral', 'instrument---acousticguitar', 'genre---poprock', 'instrument---piano', 'genre---trance', 'genre---dance', 'instrument---electricguitar', 'genre---soundtrack', 'genre---house', 'genre---hiphop', 'genre---classical', 'mood/theme---energetic', 'genre---electronic', 'genre---world', 'genre---experimental', 'instrument---violin', 'genre---folk', 'mood/theme---emotional', 'instrument---voice', 'instrument---keyboard', 'genre---pop', 'instrument---bass', 'instrument---computer', 'mood/theme---film', 'genre---triphop', 'genre---jazz', 'genre---funk', 'mood/theme---relaxing']
@@ -107,7 +106,9 @@ class Predict(object):
             self.mlb = LabelBinarizer().fit(TAGS)
 
     def load(self, filename):
-        S = torch.load(filename)
+
+        map_loc = None if self.is_cuda else 'cpu'  # TODO(ethman): might have to change this
+        S = torch.load(filename, map_location=map_loc)
         if 'spec.mel_scale.fb' in S.keys():
             self.model.spec.mel_scale.fb = S['spec.mel_scale.fb']
         self.model.load_state_dict(S)

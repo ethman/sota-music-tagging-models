@@ -3,19 +3,17 @@ import pickle
 import os
 import time
 import numpy as np
-import pandas as pd
 from sklearn import metrics
 import datetime
 import csv
 import tqdm
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from sklearn.preprocessing import LabelBinarizer
 from torch.utils.tensorboard import SummaryWriter
 from torch.autograd import Variable
 
-import model as Model
+from . import model as Model
 
 
 skip_files = set(['TRAIISZ128F42684BB', 'TRAONEQ128F42A8AB7', 'TRADRNH128E0784511', 'TRBGHEU128F92D778F',
