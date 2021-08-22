@@ -19,14 +19,14 @@ project_dir = Path(__file__).parent.resolve()
 MODEL_DIR = project_dir / 'models'
 
 
-class Predictor(BasePredictor):
+class MusicTagger(BasePredictor):
 
     def __init__(self, model_type, training_data, batch_size=1):
 
         model_load_path = MODEL_DIR / training_data / model_type / 'best_model.pth'
 
         config = DummyConfig(model_type, model_load_path, batch_size=batch_size)
-        super(Predictor, self).__init__(config)
+        super(MusicTagger, self).__init__(config)
 
     def preprocess(self, x):
         """Ready an array x to input into the network."""

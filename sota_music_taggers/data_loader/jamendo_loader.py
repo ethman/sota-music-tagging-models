@@ -6,9 +6,10 @@ import numpy as np
 from torch.utils import data
 from sklearn.preprocessing import LabelBinarizer
 
+from ..tag_metadata import JAMENDO_TAGS
+
 META_PATH = './../split/mtg-jamendo/'
 
-TAGS = ['genre---downtempo', 'genre---ambient', 'genre---rock', 'instrument---synthesizer', 'genre---atmospheric', 'genre---indie', 'instrument---electricpiano', 'genre---newage', 'instrument---strings', 'instrument---drums', 'instrument---drummachine', 'genre---techno', 'instrument---guitar', 'genre---alternative', 'genre---easylistening', 'genre---instrumentalpop', 'genre---chillout', 'genre---metal', 'mood/theme---happy', 'genre---lounge', 'genre---reggae', 'genre---popfolk', 'genre---orchestral', 'instrument---acousticguitar', 'genre---poprock', 'instrument---piano', 'genre---trance', 'genre---dance', 'instrument---electricguitar', 'genre---soundtrack', 'genre---house', 'genre---hiphop', 'genre---classical', 'mood/theme---energetic', 'genre---electronic', 'genre---world', 'genre---experimental', 'instrument---violin', 'genre---folk', 'mood/theme---emotional', 'instrument---voice', 'instrument---keyboard', 'genre---pop', 'instrument---bass', 'instrument---computer', 'mood/theme---film', 'genre---triphop', 'genre---jazz', 'genre---funk', 'mood/theme---relaxing']
 
 def read_file(tsv_file):
     tracks = {}
@@ -36,7 +37,7 @@ class AudioFolder(data.Dataset):
         return npy.astype('float32'), tag_binary.astype('float32')
 
     def get_songlist(self):
-        self.mlb = LabelBinarizer().fit(TAGS)
+        self.mlb = LabelBinarizer().fit(JAMENDO_TAGS)
         if self.split == 'TRAIN':
             train_file = os.path.join(META_PATH, 'autotagging_top50tags-train.tsv')
             self.file_dict = read_file(train_file)
