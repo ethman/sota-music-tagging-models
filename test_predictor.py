@@ -43,7 +43,7 @@ def test_all_combos():
 
 def simple_test():
     audio_path = 'example_audio/mixture.mp3'
-    audio, sr = librosa.load(audio_path, sr=TAGGER_SR)
+    audio, sr = librosa.load(audio_path, sr=TAGGER_SR, mono=True)
 
     audio = torch.Tensor(audio)
 
@@ -51,7 +51,9 @@ def simple_test():
     model_type = 'fcn'
 
     model = MusicTagger(model_type, training_data, batch_size=1)
-    outputs = model(audio)
+    # outputs = model(audio)
+
+    labels = model.forward_labels(audio)
 
     i = 0
 
@@ -64,5 +66,5 @@ def load_tag_labels():
 
 if __name__ == '__main__':
     # test_all_combos()
-    # simple_test()
-    load_tag_labels()
+    simple_test()
+    # load_tag_labels()
