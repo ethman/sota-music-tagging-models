@@ -30,13 +30,13 @@ class MusicTagger(BasePredictor):
         config = DummyConfig(model_type, model_load_path, batch_size=batch_size)
         super(MusicTagger, self).__init__(config)
 
-    def preprocess(self, x):
+    def preprocess(self, raw):
         """Ready an array x to input into the network."""
-        length = len(x)
+        length = len(raw)
         hop = (length - self.input_length) // self.batch_size
         x = torch.zeros(self.batch_size, self.input_length)
         for i in range(self.batch_size):
-            x[i] = torch.Tensor(x[i * hop:i * hop + self.input_length]).unsqueeze(0)
+            x[i] = torch.Tensor(raw[i * hop:i * hop + self.input_length]).unsqueeze(0)
         return x
 
     def forward(self, x):
