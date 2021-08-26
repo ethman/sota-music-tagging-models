@@ -34,9 +34,9 @@ class MusicTagger(BasePredictor):
         """Ready an array x to input into the network."""
         length = len(raw)
         hop = (length - self.input_length) // self.batch_size
-        x = torch.zeros(self.batch_size, self.input_length)
+        x = torch.zeros(self.batch_size, self.input_length).to(raw.device)
         for i in range(self.batch_size):
-            x[i] = torch.Tensor(raw[i * hop:i * hop + self.input_length]).unsqueeze(0)
+            x[i] = torch.Tensor(raw[i * hop:i * hop + self.input_length]).to(raw.device).unsqueeze(0)
         return x
 
     def forward(self, x):
