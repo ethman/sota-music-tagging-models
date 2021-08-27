@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .eval import Predict as BasePredictor
 from .tag_metadata import MSD_TAGS, MTAT_TAGS, JAMENDO_TAGS
-import torch
+from torch.nn import functional as F
 
 
 @dataclass
@@ -33,16 +33,16 @@ class MusicTagger(BasePredictor):
     def preprocess(self, raw):
         """Ready an array x to input into the network."""
         length = len(raw)
-        hop = (length - self.input_length) // self.batch_size
-        x = torch.zeros(self.batch_size, self.input_length).to(raw.device)
-        for i in range(self.batch_size):
-            x[i] = torch.Tensor(raw[i * hop:i * hop + self.input_length]).to(raw.device).unsqueeze(0)
-        return x
+        if length > self.input_length:
+            raise ValueError('Input too long (not supported yet lol).')
+
+        pad = self.input_length - length
+        return F.pad(raw, (0, pad), 'constant', 0).unsqueeze(0)
 
     def forward(self, x):
         """Forward pass of the net."""
         x = self.preprocess(x)
-        return self.model(self.to_var(x))
+        return self.model(x)
 
     def __call__(self, x):
         return self.forward(x)
