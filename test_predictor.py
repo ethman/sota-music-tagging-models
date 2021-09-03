@@ -19,6 +19,7 @@ def test_all_combos():
 
     audio_path = 'example_audio/mixture.mp3'
     audio, sr = librosa.load(audio_path, sr=TAGGER_SR)
+    audio = audio[:audio.shape[0] // 4]
 
     for training_data in all_datasets:
         print(f'     {training_data}')
@@ -26,7 +27,7 @@ def test_all_combos():
         for model_type in all_models:
             s = f'{model_type:9}  '
             try:
-                model = MusicTagger(model_type, training_data, batch_size=1)
+                model = MusicTagger(model_type, training_data)
                 s += f'  Yes  Loaded     '
             except:
                 s += f'  Not  Loaded     - No  Outputs'
@@ -36,7 +37,7 @@ def test_all_combos():
                 outputs = model(audio)
                 s += f'  Yes  Outputs'
             except Exception as e:
-                s += f' - No  Outputs'
+                s += f' - No  Outputs: {e}'
             print(s)
         print('\n\n')
 
@@ -50,7 +51,7 @@ def simple_test():
     training_data = 'mtat'
     model_type = 'fcn'
 
-    model = MusicTagger(model_type, training_data, batch_size=1)
+    model = MusicTagger(model_type, training_data)
     # outputs = model(audio)
 
     labels = model.forward_labels(audio)
@@ -65,6 +66,6 @@ def load_tag_labels():
     i = 0
 
 if __name__ == '__main__':
-    # test_all_combos()
-    simple_test()
+    test_all_combos()
+    # simple_test()
     # load_tag_labels()

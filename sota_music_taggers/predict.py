@@ -1,10 +1,12 @@
 # coding: utf-8
 from dataclasses import dataclass
 from pathlib import Path
+import numpy as np
+import torch
+from torch.nn import functional as F
 
 from .eval import Predict as BasePredictor
 from .tag_metadata import MSD_TAGS, MTAT_TAGS, JAMENDO_TAGS
-from torch.nn import functional as F
 
 
 @dataclass
@@ -22,22 +24,27 @@ MODEL_DIR = project_dir / 'models'
 
 class MusicTagger(BasePredictor):
 
-    def __init__(self, model_type, training_data, batch_size=1):
+    def __init__(self, model_type, training_data):
 
         model_load_path = MODEL_DIR / training_data / model_type / 'best_model.pth'
         self.training_data = training_data
 
-        config = DummyConfig(model_type, model_load_path, batch_size=batch_size)
+        config = DummyConfig(model_type, model_load_path)
         super(MusicTagger, self).__init__(config)
 
     def preprocess(self, raw):
         """Ready an array x to input into the network."""
         length = len(raw)
-        if length > self.input_length:
-            raise ValueError('Input too long (not supported yet lol).')
+        if isinstance(raw, np.ndarray):
+            raw = torch.from_numpy(raw)
 
-        pad = self.input_length - length
-        return F.pad(raw, (0, pad), 'constant', 0).unsqueeze(0)
+        pad = self.input_length - length % self.input_length
+        batch = np.ceil(length / self.input_length).astype(int)
+        x = F.pad(raw, (0, pad), 'constant', 0).reshape(batch, self.input_length)
+
+        if self.is_cuda:
+            return x.cuda()
+        return x
 
     def forward(self, x):
         """Forward pass of the net."""
