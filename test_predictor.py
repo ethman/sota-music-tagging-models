@@ -27,14 +27,14 @@ def test_all_combos():
         for model_type in all_models:
             s = f'{model_type:9}  '
             try:
-                model = MusicTagger(model_type, training_data)
+                model = MusicTagger(model_type, training_data, return_feats=True)
                 s += f'  Yes  Loaded     '
             except:
                 s += f'  Not  Loaded     - No  Outputs'
                 continue
 
             try:
-                outputs = model(audio)
+                outputs, feats = model(audio)
                 s += f'  Yes  Outputs'
             except Exception as e:
                 s += f' - No  Outputs: {e}'

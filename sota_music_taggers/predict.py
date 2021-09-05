@@ -24,13 +24,13 @@ MODEL_DIR = project_dir / 'models'
 
 class MusicTagger(BasePredictor):
 
-    def __init__(self, model_type, training_data):
+    def __init__(self, model_type, training_data, return_feats=False):
 
         model_load_path = MODEL_DIR / training_data / model_type / 'best_model.pth'
         self.training_data = training_data
 
         config = DummyConfig(model_type, model_load_path)
-        super(MusicTagger, self).__init__(config)
+        super(MusicTagger, self).__init__(config, return_feats)
 
     def preprocess(self, raw):
         """Ready an array x to input into the network."""
@@ -49,6 +49,7 @@ class MusicTagger(BasePredictor):
     def forward(self, x):
         """Forward pass of the net."""
         x = self.preprocess(x)
+        # TODO: Aggregate predictions if batch size is used to chop up long inputs
         return self.model(x)
 
     def __call__(self, x):

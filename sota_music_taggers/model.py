@@ -22,8 +22,10 @@ class FCN(nn.Module):
                 f_min=0.0,
                 f_max=8000.0,
                 n_mels=96,
-                n_class=50):
+                n_class=50,
+                return_feats=False):
         super(FCN, self).__init__()
+        self.return_feats = return_feats
 
         # Spectrogram
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
@@ -51,20 +53,32 @@ class FCN(nn.Module):
         x = self.to_db(x)
         x = x.unsqueeze(1)
         x = self.spec_bn(x)
+        feats = []
+        def append_feat(f):
+            if self.return_feats:
+                feats.append(f)
 
         # FCN
         x = self.layer1(x)
+        append_feat(x)
         x = self.layer2(x)
+        append_feat(x)
         x = self.layer3(x)
+        append_feat(x)
         x = self.layer4(x)
+        append_feat(x)
         x = self.layer5(x)
+        append_feat(x)
 
         # Dense
         x = x.view(x.size(0), -1)
         x = self.dropout(x)
         x = self.dense(x)
+        append_feat(x)
         x = nn.Sigmoid()(x)
 
+        if self.return_feats:
+            return x, feats
         return x
 
 
@@ -82,8 +96,10 @@ class Musicnn(nn.Module):
                 f_max=8000.0,
                 n_mels=96,
                 n_class=50,
-                dataset='mtat'):
+                dataset='mtat',
+                return_feats=False):
         super(Musicnn, self).__init__()
+        self.return_feats = return_feats
 
         # Spectrogram
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
@@ -122,12 +138,17 @@ class Musicnn(nn.Module):
         x = self.to_db(x)
         x = x.unsqueeze(1)
         x = self.spec_bn(x)
+        feats = []
+        def append_feat(f):
+            if self.return_feats:
+                feats.append(f)
 
         # Pons front-end
         out = []
         for layer in self.layers:
             out.append(layer(x))
         out = torch.cat(out, dim=1)
+        append_feat(out)
 
         # Pons back-end
         length = out.size(2)
@@ -135,6 +156,7 @@ class Musicnn(nn.Module):
         res2 = self.layer2(res1) + res1
         res3 = self.layer3(res2) + res2
         out = torch.cat([out, res1, res2, res3], 1)
+        append_feat(out)
 
         mp = nn.MaxPool1d(length)(out)
         avgp = nn.AvgPool1d(length)(out)
@@ -145,8 +167,11 @@ class Musicnn(nn.Module):
         out = self.relu(self.bn(self.dense1(out)))
         out = self.dropout(out)
         out = self.dense2(out)
+        append_feat(out)
         out = nn.Sigmoid()(out)
 
+        if self.return_feats:
+            return x, feats
         return out
 
 
@@ -162,8 +187,10 @@ class CRNN(nn.Module):
                 f_min=0.0,
                 f_max=8000.0,
                 n_mels=96,
-                n_class=50):
+                n_class=50,
+                return_feats=False):
         super(CRNN, self).__init__()
+        self.return_feats = return_feats
 
         # Spectrogram
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
@@ -193,23 +220,36 @@ class CRNN(nn.Module):
         x = self.to_db(x)
         x = x.unsqueeze(1)
         x = self.spec_bn(x)
+        feats = []
+        def append_feat(f):
+            if self.return_feats:
+                feats.append(f)
 
         # CCN
         x = self.layer1(x)
+        append_feat(x)
         x = self.layer2(x)
+        append_feat(x)
         x = self.layer3(x)
+        append_feat(x)
         x = self.layer4(x)
+        append_feat(x)
 
         # RNN
         x = x.squeeze(2)
         x = x.permute(0, 2, 1)
         x, _ = self.layer5(x)
+        append_feat(x)
         x = x[:, -1, :]
 
         # Dense
         x = self.dropout(x)
         x = self.dense(x)
+        append_feat(x)
         x = nn.Sigmoid()(x)
+
+        if self.return_feats:
+            return x, feats
 
         return x
 
@@ -221,8 +261,10 @@ class SampleCNN(nn.Module):
     Sample-level CNN.
     '''
     def __init__(self,
-                 n_class=50):
+                 n_class=50,
+                 return_feats=False):
         super(SampleCNN, self).__init__()
+        self.return_feats = return_feats
         self.layer1 = Conv_1d(1, 128, shape=3, stride=3, pooling=1)
         self.layer2 = Conv_1d(128, 128, shape=3, stride=1, pooling=3)
         self.layer3 = Conv_1d(128, 128, shape=3, stride=1, pooling=3)
@@ -239,21 +281,41 @@ class SampleCNN(nn.Module):
 
     def forward(self, x):
         x = x.unsqueeze(1)
+        feats = []
+        def append_feat(f):
+            if self.return_feats:
+                feats.append(f)
+
         x = self.layer1(x)
+        append_feat(x)
         x = self.layer2(x)
+        append_feat(x)
         x = self.layer3(x)
+        append_feat(x)
         x = self.layer4(x)
+        append_feat(x)
         x = self.layer5(x)
+        append_feat(x)
         x = self.layer6(x)
+        append_feat(x)
         x = self.layer7(x)
+        append_feat(x)
         x = self.layer8(x)
+        append_feat(x)
         x = self.layer9(x)
+        append_feat(x)
         x = self.layer10(x)
+        append_feat(x)
         x = self.layer11(x)
+        append_feat(x)
         x = x.squeeze(-1)
         x = self.dropout(x)
         x = self.dense(x)
+        append_feat(x)
         x = nn.Sigmoid()(x)
+
+        if self.return_feats:
+            return x, feats
         return x
 
 
@@ -264,8 +326,10 @@ class SampleCNNSE(nn.Module):
     Sample-level CNN + residual connections + squeeze & excitation.
     '''
     def __init__(self,
-                 n_class=50):
+                 n_class=50,
+                 return_feats=False):
         super(SampleCNNSE, self).__init__()
+        self.return_feats = return_feats
         self.layer1 = ResSE_1d(1, 128, shape=3, stride=3, pooling=1)
         self.layer2 = ResSE_1d(128, 128, shape=3, stride=1, pooling=3)
         self.layer3 = ResSE_1d(128, 128, shape=3, stride=1, pooling=3)
@@ -284,22 +348,42 @@ class SampleCNNSE(nn.Module):
 
     def forward(self, x):
         x = x.unsqueeze(1)
+        feats = []
+        def append_feat(f):
+            if self.return_feats:
+                feats.append(f)
+
         x = self.layer1(x)
+        append_feat(x)
         x = self.layer2(x)
+        append_feat(x)
         x = self.layer3(x)
+        append_feat(x)
         x = self.layer4(x)
+        append_feat(x)
         x = self.layer5(x)
+        append_feat(x)
         x = self.layer6(x)
+        append_feat(x)
         x = self.layer7(x)
+        append_feat(x)
         x = self.layer8(x)
+        append_feat(x)
         x = self.layer9(x)
+        append_feat(x)
         x = self.layer10(x)
+        append_feat(x)
         x = self.layer11(x)
+        append_feat(x)
         x = x.squeeze(-1)
         x = nn.ReLU()(self.bn(self.dense1(x)))
         x = self.dropout(x)
         x = self.dense2(x)
+        append_feat(x)
         x = nn.Sigmoid()(x)
+
+        if self.return_feats:
+            return x, feats
         return x
 
 
@@ -316,8 +400,10 @@ class ShortChunkCNN(nn.Module):
                 f_min=0.0,
                 f_max=8000.0,
                 n_mels=128,
-                n_class=50):
+                n_class=50,
+                return_feats=False):
         super(ShortChunkCNN, self).__init__()
+        self.return_feats = return_feats
 
         # Spectrogram
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
@@ -350,15 +436,26 @@ class ShortChunkCNN(nn.Module):
         x = self.to_db(x)
         x = x.unsqueeze(1)
         x = self.spec_bn(x)
+        feats = []
+        def append_feat(f):
+            if self.return_feats:
+                feats.append(f)
 
         # CNN
         x = self.layer1(x)
+        append_feat(x)
         x = self.layer2(x)
+        append_feat(x)
         x = self.layer3(x)
+        append_feat(x)
         x = self.layer4(x)
+        append_feat(x)
         x = self.layer5(x)
+        append_feat(x)
         x = self.layer6(x)
+        append_feat(x)
         x = self.layer7(x)
+        append_feat(x)
         x = x.squeeze(2)
 
         # Global Max Pooling
@@ -368,12 +465,16 @@ class ShortChunkCNN(nn.Module):
 
         # Dense
         x = self.dense1(x)
+        append_feat(x)
         x = self.bn(x)
         x = self.relu(x)
         x = self.dropout(x)
         x = self.dense2(x)
+        append_feat(x)
         x = nn.Sigmoid()(x)
 
+        if self.return_feats:
+            return x, feats
         return x
 
 
@@ -388,8 +489,10 @@ class ShortChunkCNN_Res(nn.Module):
                 f_min=0.0,
                 f_max=8000.0,
                 n_mels=128,
-                n_class=50):
+                n_class=50,
+                return_feats=False):
         super(ShortChunkCNN_Res, self).__init__()
+        self.return_feats = return_feats
 
         # Spectrogram
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
@@ -422,15 +525,26 @@ class ShortChunkCNN_Res(nn.Module):
         x = self.to_db(x)
         x = x.unsqueeze(1)
         x = self.spec_bn(x)
+        feats = []
+        def append_feat(f):
+            if self.return_feats:
+                feats.append(f)
 
         # CNN
         x = self.layer1(x)
+        append_feat(x)
         x = self.layer2(x)
+        append_feat(x)
         x = self.layer3(x)
+        append_feat(x)
         x = self.layer4(x)
+        append_feat(x)
         x = self.layer5(x)
+        append_feat(x)
         x = self.layer6(x)
+        append_feat(x)
         x = self.layer7(x)
+        append_feat(x)
         x = x.squeeze(2)
 
         # Global Max Pooling
@@ -440,12 +554,16 @@ class ShortChunkCNN_Res(nn.Module):
 
         # Dense
         x = self.dense1(x)
+        append_feat(x)
         x = self.bn(x)
         x = self.relu(x)
         x = self.dropout(x)
         x = self.dense2(x)
+        append_feat(x)
         x = nn.Sigmoid()(x)
 
+        if self.return_feats:
+            return x, feats
         return x
 
 
@@ -462,8 +580,10 @@ class CNNSA(nn.Module):
                 f_min=0.0,
                 f_max=8000.0,
                 n_mels=128,
-                n_class=50):
+                n_class=50,
+                return_feats=False):
         super(CNNSA, self).__init__()
+        self.return_feats = return_feats
 
         # Spectrogram
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
@@ -520,15 +640,29 @@ class CNNSA(nn.Module):
         x = self.to_db(x)
         x = x.unsqueeze(1)
         x = self.spec_bn(x)
+        feats = []
+        def append_feat(f):
+            if self.return_feats:
+                if isinstance(f, list):
+                    feats.extend(f)
+                else:
+                    feats.append(f)
 
         # CNN
         x = self.layer1(x)
+        append_feat(x)
         x = self.layer2(x)
+        append_feat(x)
         x = self.layer3(x)
+        append_feat(x)
         x = self.layer4(x)
+        append_feat(x)
         x = self.layer5(x)
+        append_feat(x)
         x = self.layer6(x)
+        append_feat(x)
         x = self.layer7(x)
+        append_feat(x)
         x = x.squeeze(2)
 
         # Get [CLS] token
@@ -537,14 +671,19 @@ class CNNSA(nn.Module):
 
         # Transformer encoder
         x = self.encoder(x)
+        append_feat(x)
         x = x[-1]
         x = self.pooler(x)
+        append_feat(x)
 
         # Dense
         x = self.dropout(x)
         x = self.dense(x)
+        append_feat(x)
         x = nn.Sigmoid()(x)
 
+        if self.return_feats:
+            return x, feats
         return x
 
 
@@ -564,8 +703,10 @@ class HarmonicCNN(nn.Module):
                 n_class=50,
                 n_harmonic=6,
                 semitone_scale=2,
-                learn_bw='only_Q'):
+                learn_bw='only_Q',
+                return_feats=False):
         super(HarmonicCNN, self).__init__()
+        self.return_feats = return_feats
 
         # Harmonic STFT
         self.hstft = HarmonicSTFT(sample_rate=sample_rate,
@@ -594,15 +735,26 @@ class HarmonicCNN(nn.Module):
     def forward(self, x):
         # Spectrogram
         x = self.hstft_bn(self.hstft(x))
+        feats = []
+        def append_feat(f):
+            if self.return_feats:
+                feats.append(f)
 
         # CNN
         x = self.layer1(x)
+        append_feat(x)
         x = self.layer2(x)
+        append_feat(x)
         x = self.layer3(x)
+        append_feat(x)
         x = self.layer4(x)
+        append_feat(x)
         x = self.layer5(x)
+        append_feat(x)
         x = self.layer6(x)
+        append_feat(x)
         x = self.layer7(x)
+        append_feat(x)
         x = x.squeeze(2)
 
         # Global Max Pooling
@@ -612,11 +764,15 @@ class HarmonicCNN(nn.Module):
 
         # Dense
         x = self.dense1(x)
+        append_feat(x)
         x = self.bn(x)
         x = self.relu(x)
         x = self.dropout(x)
         x = self.dense2(x)
+        append_feat(x)
         x = nn.Sigmoid()(x)
 
+        if self.return_feats:
+            return x, feats
         return x
 

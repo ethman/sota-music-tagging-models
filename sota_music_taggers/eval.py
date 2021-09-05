@@ -37,49 +37,49 @@ def read_file(tsv_file):
 
 
 class Predict(object):
-    def __init__(self, config):
+    def __init__(self, config, return_feats=False):
         self.model_type = config.model_type
         self.model_load_path = config.model_load_path
         self.dataset = config.dataset
         self.data_path = config.data_path
         self.batch_size = config.batch_size
         self.is_cuda = torch.cuda.is_available()
-        self.build_model()
+        self.build_model(return_feats=return_feats)
         self.get_dataset()
 
-    def get_model(self):
+    def get_model(self, return_feats=False):
         if self.model_type == 'fcn':
             self.input_length = 29 * 16000
-            return Model.FCN()
+            return Model.FCN(return_feats=return_feats)
         elif self.model_type == 'musicnn':
             self.input_length = 3 * 16000
-            return Model.Musicnn(dataset=self.dataset)
+            return Model.Musicnn(dataset=self.dataset, return_feats=return_feats)
         elif self.model_type == 'crnn':
             self.input_length = 29 * 16000
-            return Model.CRNN()
+            return Model.CRNN(return_feats=return_feats)
         elif self.model_type == 'sample':
             self.input_length = 59049
-            return Model.SampleCNN()
+            return Model.SampleCNN(return_feats=return_feats)
         elif self.model_type == 'se':
             self.input_length = 59049
-            return Model.SampleCNNSE()
+            return Model.SampleCNNSE(return_feats=return_feats)
         elif self.model_type == 'attention':
             self.input_length = 15 * 16000
-            return Model.CNNSA()
+            return Model.CNNSA(return_feats=return_feats)
         elif self.model_type == 'hcnn':
             self.input_length = 5 * 16000
-            return Model.HarmonicCNN()
+            return Model.HarmonicCNN(return_feats=return_feats)
         elif self.model_type == 'short':
             self.input_length = 59049
-            return Model.ShortChunkCNN()
+            return Model.ShortChunkCNN(return_feats=return_feats)
         elif self.model_type == 'short_res':
             self.input_length = 59049
-            return Model.ShortChunkCNN_Res()
+            return Model.ShortChunkCNN_Res(return_feats=return_feats)
         else:
             print('model_type has to be one of [fcn, musicnn, crnn, sample, se, short, short_res, attention]')
 
-    def build_model(self):
-        self.model = self.get_model()
+    def build_model(self, return_feats=False):
+        self.model = self.get_model(return_feats)
 
         # load model
         self.load(self.model_load_path)
@@ -87,7 +87,6 @@ class Predict(object):
         # cuda
         if self.is_cuda:
             self.model.cuda()
-
 
     def get_dataset(self):
         if self.dataset == 'mtat':
