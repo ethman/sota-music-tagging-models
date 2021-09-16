@@ -37,10 +37,15 @@ class MusicTagger(BasePredictor):
         length = len(raw)
         if isinstance(raw, np.ndarray):
             raw = torch.from_numpy(raw)
+        x = raw
 
-        pad = self.input_length - length % self.input_length
         batch = np.ceil(length / self.input_length).astype(int)
-        x = F.pad(raw, (0, pad), 'constant', 0).reshape(batch, self.input_length)
+        if length % self.input_length:
+            # Only pad if not a perfect window size already
+            pad = self.input_length - length % self.input_length
+            x = F.pad(x, (0, pad), 'constant', 0)
+
+        x = x.reshape(batch, self.input_length)
 
         if self.is_cuda:
             return x.cuda()
@@ -54,6 +59,9 @@ class MusicTagger(BasePredictor):
 
     def __call__(self, x):
         return self.forward(x)
+
+    def __str__(self):
+        return f'{self.model_type}_{self.training_data}'
 
     def _get_metadata(self):
         if self.training_data.lower() == 'mtat':
