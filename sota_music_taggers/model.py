@@ -28,14 +28,11 @@ class FCN(nn.Module):
         self.return_feats = return_feats
 
         # Spectrogram
-        window = torch.hann_window(n_fft)
-        window_fn = lambda _: window
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
                                                          n_fft=n_fft,
                                                          f_min=f_min,
                                                          f_max=f_max,
-                                                         n_mels=n_mels,
-                                                         window_fn=window_fn)
+                                                         n_mels=n_mels)
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
@@ -105,14 +102,11 @@ class Musicnn(nn.Module):
         self.return_feats = return_feats
 
         # Spectrogram
-        window = torch.hann_window(n_fft)
-        window_fn = lambda _: window
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
                                                          n_fft=n_fft,
                                                          f_min=f_min,
                                                          f_max=f_max,
-                                                         n_mels=n_mels,
-                                                         window_fn=window_fn)
+                                                         n_mels=n_mels)
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
@@ -199,14 +193,11 @@ class CRNN(nn.Module):
         self.return_feats = return_feats
 
         # Spectrogram
-        window = torch.hann_window(n_fft)
-        window_fn = lambda _: window
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
                                                          n_fft=n_fft,
                                                          f_min=f_min,
                                                          f_max=f_max,
-                                                         n_mels=n_mels,
-                                                         window_fn=window_fn)
+                                                         n_mels=n_mels)
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
@@ -415,14 +406,11 @@ class ShortChunkCNN(nn.Module):
         self.return_feats = return_feats
 
         # Spectrogram
-        window = torch.hann_window(n_fft)
-        window_fn = lambda _: window
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
                                                          n_fft=n_fft,
                                                          f_min=f_min,
                                                          f_max=f_max,
-                                                         n_mels=n_mels,
-                                                         window_fn=window_fn)
+                                                         n_mels=n_mels)
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
@@ -507,14 +495,11 @@ class ShortChunkCNN_Res(nn.Module):
         self.return_feats = return_feats
 
         # Spectrogram
-        window = torch.hann_window(n_fft)
-        window_fn = lambda _: window
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
                                                          n_fft=n_fft,
                                                          f_min=f_min,
                                                          f_max=f_max,
-                                                         n_mels=n_mels,
-                                                         window_fn=window_fn)
+                                                         n_mels=n_mels)
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
@@ -601,14 +586,11 @@ class CNNSA(nn.Module):
         self.return_feats = return_feats
 
         # Spectrogram
-        window = torch.hann_window(n_fft)
-        window_fn = lambda _: window
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
                                                          n_fft=n_fft,
                                                          f_min=f_min,
                                                          f_max=f_max,
-                                                         n_mels=n_mels,
-                                                         window_fn=window_fn)
+                                                         n_mels=n_mels)
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
