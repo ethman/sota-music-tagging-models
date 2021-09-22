@@ -46,9 +46,6 @@ class MusicTagger(BasePredictor):
             x = F.pad(x, (0, pad), 'constant', 0)
 
         x = x.reshape(batch, self.input_length)
-
-        if self.is_cuda:
-            return x.cuda()
         return x
 
     def to(self, *args, **kwargs):
