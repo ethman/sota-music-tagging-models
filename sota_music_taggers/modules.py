@@ -212,10 +212,12 @@ class HarmonicSTFT(nn.Module):
         self.bw_beta = 24.7
 
         # Spectrogram
+        window = torch.hann_window(n_fft)
+        window_fn = lambda _: window
         self.spec = torchaudio.transforms.Spectrogram(n_fft=n_fft, win_length=win_length,
                                                       hop_length=None, pad=0,
-                                                      window_fn=torch.hann_window,
-                                                      power=power, normalized=normalized, wkwargs=None)
+                                                      window_fn=window_fn,
+                                                      power=power, normalized=normalized)
         self.amplitude_to_db = torchaudio.transforms.AmplitudeToDB()
 
         # Initialize the filterbank. Equally spaced in MIDI scale.

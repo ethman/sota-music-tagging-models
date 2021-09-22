@@ -51,6 +51,9 @@ class MusicTagger(BasePredictor):
             return x.cuda()
         return x
 
+    def to(self, *args, **kwargs):
+        self.model.to(*args, **kwargs)
+
     def forward(self, x):
         """Forward pass of the net."""
         x = self.preprocess(x)
